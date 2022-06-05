@@ -1,4 +1,12 @@
+import * as HomePage from '/cypress/support//PageObject/HomePage.js';
+import * as SignUpPage from '/cypress/support//PageObject/SignUpPage.js';
+import * as LoginPage from '/cypress/support//PageObject/LoginPage.js';
+import * as CreateHeroPage from '/cypress/support//PageObject/CreateHeroPage.js';
+import * as DeleteHeroPage from '/cypress/support//PageObject/DeleteHeroPage.js';
+import { logOutUser } from '../support/commands';
+
 describe('izicap.cy.js', () => {
+
   before(() => {
     cy.clearCookies();
     cy.visit('https://ismaestro.github.io/angular-example-app/');
@@ -9,59 +17,64 @@ describe('izicap.cy.js', () => {
     Cypress.Cookies.preserveOnce('accessToken','refreshToken');
   })
 
+  const rdmvalue = () => Cypress._.random(0, 1e6);
+  const rdmValueString = rdmvalue();
+  const emailSIgnUp = 'email' + rdmvalue() + '@testqa.com';
+  const passwordSignUp = `Password${rdmValueString}`;
+  const firstName = `FirstName${rdmValueString}`;
+  const lastName = `FirstName${rdmValueString}`;
+  const nameHero = `NameHero${rdmValueString}`;
+  const alterEgoHero = `NameHero${rdmValueString}`;
+
   it('should visit homepage', () => {
-    cy.get('.header__title').should('be.visible').contains('Heroes published');
-    cy.get('.mat-card').should('be.visible');
-    cy.get('[href="/angular-example-app/auth/sign-up"]').should('be.visible').click();
+    HomePage.getAndCheckTitleHomePage();
+    HomePage.getAndCheckHerosCard();
+    HomePage.getBtnSignUpTopBar().click();
   })
 
   it('register on the site', () => {
-    cy.get('.signup--form__header-title').should('be.visible').contains('Give it a try!');
-    cy.get('#mat-input-1').should('be.visible').type('firstnameQA').should('have.value', 'firstnameQA');
-    cy.get('#mat-input-2').should('be.visible').type('lastnameQA').should('have.value', 'lastnameQA');
-    cy.get('#mat-input-3').should('be.visible').type('lastnameQA@gmail.com').should('have.value', 'lastnameQA@gmail.com');
-    cy.get('#mat-input-4').should('be.visible').type('testqa12Test').should('have.value', 'testqa12Test');
-    cy.get('#mat-hint-0').should('be.visible').contains('Must be minimum eight characters, at least one uppercase letter, one lowercase letter and one number');
-    cy.get(':nth-child(5) > .mat-focus-indicator').should('be.visible').click();
+    SignUpPage.getTitlePageSignUp();
+    SignUpPage.getInputFirstName().type(firstName).should('have.value', firstName);
+    SignUpPage.getInputLastName().type(lastName).should('have.value', lastName);
+    SignUpPage.getInputEmail().type(emailSIgnUp).should('have.value', emailSIgnUp);
+    SignUpPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
+    SignUpPage.getWordingInputPassword();
+    SignUpPage.getBtnValidateSignUp().click();
     cy.url().should('include','https://ismaestro.github.io/angular-example-app/auth/log-in');
-    cy.get('.mat-simple-snackbar').should('be.visible').contains('Cool! Now try to log in!');
-
+    SignUpPage.getWordingSignUpComplete();
   })
 
   it('Login with the created user ', () => {
-    cy.get('.login--form__header-title').should('be.visible').contains('Try to log in!');
-    cy.get('#mat-input-5').should('be.visible').type('lastnameQA@gmail.com').should('have.value', 'lastnameQA@gmail.com');
-    cy.get('#mat-input-6').should('be.visible').type('testqa12Test').should('have.value', 'testqa12Test');
-    cy.get('#mat-hint-1').should('be.visible').contains('Must be minimum eight characters, at least one uppercase letter, one lowercase letter and one number');
-    cy.get(':nth-child(3) > .mat-focus-indicator').should('be.visible').click();
+    LoginPage.getAndCheckTitleLoginPage();
+    LoginPage.getInputEmail().type(emailSIgnUp).should('have.value', emailSIgnUp);
+    LoginPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
+    LoginPage.getAndCheckWordingPassword();
+    LoginPage.getBtnLogin().click();
     cy.url().should('include', 'https://ismaestro.github.io/angular-example-app/hero/my-heroes')
-    cy.get('.mat-simple-snack-bar-content').should('be.visible').contains(`Nice! Let's create some heroes`);
+    LoginPage.getWordingLoginComplete();
   })
   
   it('create a new hero', () => {
-    cy.get('#left > .header__title').should('be.visible').contains('My heroes');
-    cy.get('#right > :nth-child(1)').should('be.visible').contains('Create a hero');
-    cy.get('.my-heroes__no-heroes--message').should('be.visible').contains('No heroes yet, try to create one in the right side!');
-    cy.get('#mat-input-7').should('be.visible').type('Namehero12345').should('have.value', 'Namehero12345');
-    cy.get('#mat-input-8').should('be.visible').type('AlterEgohero12345').should('have.value', 'AlterEgohero12345');
-    cy.get('#right >> form > button').should('be.visible').click();
-    cy.get('.mat-simple-snack-bar-content').should('be.visible').contains('Hero created');
-
+    CreateHeroPage.getAndCheckTitleCreateHeroPage();
+    CreateHeroPage.getAndCheckTitleForm();
+    CreateHeroPage.getAndCheckWodingNoheroCreated();
+    CreateHeroPage.getInputNameHero().type(nameHero).should('have.value', nameHero);
+    CreateHeroPage.getInputAlterEgo().type(alterEgoHero).should('have.value', alterEgoHero);
+    CreateHeroPage.getBtnValidateCreatedHero().click();
+    CreateHeroPage.getWordingHeroCreated();
   })
 
   it('delete a hero', () => {
-    cy.get('.mat-list-item-content').should('be.visible').contains('AlterEgohero12345');
-    cy.get('.mat-list-item-content').should('be.visible').contains('Namehero12345');
-    cy.get('.hero-actions > .mat-icon').should('be.visible').click();
-    cy.get(`[class="mat-dialog-title"]`).should('be.visible').contains('Delete hero')
-    cy.get(`[class="mat-dialog-content"]`).should('be.visible').contains('Are you sure?')
-    cy.get(`[aria-label="no button"]`).should('be.visible').contains('No');
-    cy.get(`[aria-label="yes button"]`).should('be.visible').contains('Yes').click();
+    DeleteHeroPage.getAndCheckHeroList().contains(alterEgoHero);
+    DeleteHeroPage.getAndCheckHeroList().contains(nameHero);
+    DeleteHeroPage.getBtnTrash().click();
+    DeleteHeroPage.getTitlePopUpDeleteHero();
+    DeleteHeroPage.getTitleConfirmDelete();
+    DeleteHeroPage.getBtnNo();
+    DeleteHeroPage.getBtnYes().click();
   })
 
   it('log out user', () => {
-    cy.get('body > app-root > div > app-header > header > nav > div > div:nth-child(1) > a:nth-child(3)').should('be.visible').contains('Log out').click();
-    cy.get('[href="/angular-example-app/auth/log-in"]').should('be.visible').contains('Log In');
-    cy.get('.header__title').should('be.visible').contains('Heroes published')
+    cy.logout();
   })
 })
