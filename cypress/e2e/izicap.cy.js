@@ -1,12 +1,15 @@
 import * as HomePage from '/cypress/support/PageObject/HomePage.js';
 import * as SignUpPage from '/cypress/support/PageObject/SignUpPage.js';
-import * as LoginPage from '/cypress/support/PageObject/LoginPage.js';
+import * as LoginLogoutPage from '/cypress/support/PageObject/LoginLogoutPage.js';
 import * as CreateHeroPage from '/cypress/support/PageObject/CreateHeroPage.js';
 import * as DeleteHeroPage from '/cypress/support/PageObject/DeleteHeroPage.js';
 import * as UrlData from '/cypress/fixtures/urlData.json';
 import * as apiData from '/cypress/fixtures/apiData.json';
 
 describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
+  Cypress.on('uncaught:exception', (_err) => {
+    return false;
+  });
 
   before(() => {
     cy.clearCookiesSession();
@@ -30,9 +33,9 @@ describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
     cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
     HomePage.getAndCheckTitleHomePage();
     cy
-    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
-    .its('response.statusCode')
-    .should('eq', 200);
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
     HomePage.getAndCheckHerosCard();
     HomePage.getBtnSignUpTopBar().click();
   })
@@ -48,26 +51,26 @@ describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
     SignUpPage.getWordingInputPassword();
     SignUpPage.getBtnValidateSignUp().click();
     cy
-    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
-    .its('response.statusCode')
-    .should('eq', 200);
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
     cy.url().should('include',UrlData.urlLogin);
     SignUpPage.getWordingSignUpComplete();
   })
 
   it('Should Login with the created user ', () => {
     cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
-    LoginPage.getAndCheckTitleLoginPage();
-    LoginPage.getInputEmail().type(emailSIgnUp).should('have.value', emailSIgnUp);
-    LoginPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
-    LoginPage.getAndCheckWordingPassword();
-    LoginPage.getBtnLogin().click();
+    LoginLogoutPage.getAndCheckTitleLoginPage();
+    LoginLogoutPage.getInputEmail().type(emailSIgnUp).should('have.value', emailSIgnUp);
+    LoginLogoutPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
+    LoginLogoutPage.getAndCheckWordingPassword();
+    LoginLogoutPage.getBtnLogin().click();
     cy
-    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
-    .its('response.statusCode')
-    .should('eq', 200);
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
     cy.url().should('include', UrlData.urlMyHeroes)
-    LoginPage.getWordingLoginComplete();
+    LoginLogoutPage.getWordingLoginComplete();
   })
   
   it('Should create a new hero', () => {
@@ -79,9 +82,9 @@ describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
     CreateHeroPage.getInputAlterEgo().type(alterEgoHero).should('have.value', alterEgoHero);
     CreateHeroPage.getBtnValidateCreatedHero().click();
     cy
-    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
-    .its('response.statusCode')
-    .should('eq', 200);
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
     CreateHeroPage.getWordingHeroCreated();
   })
 
@@ -95,9 +98,9 @@ describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
     DeleteHeroPage.getBtnNo();
     DeleteHeroPage.getBtnYes().click();
     cy
-    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
-    .its('response.statusCode')
-    .should('eq', 200);
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
   })
 
   it('Should log out user', () => {

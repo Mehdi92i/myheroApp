@@ -1,33 +1,19 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+import * as logOutData from '/cypress/fixtures/logOutData.json';
+import * as loginData from '/cypress/fixtures/loginData.json';
+import * as LoginLogoutPage from '/cypress/support/PageObject/LoginLogoutPage.js';
+import * as UrlData from '/cypress/fixtures/urlData.json';
+import * as apiData from '/cypress/fixtures/apiData.json';
 
 Cypress.Commands.add('logOut', () => {
-    cy.get('body > app-root > div > app-header > header > nav > div > div:nth-child(1) > a:nth-child(3)').should('be.visible').contains('Log out').click();
-    cy.get('[href="/angular-example-app/auth/log-in"]').should('be.visible').contains('Log In');
-    cy.get('.header__title').should('be.visible').contains('Heroes published')
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
+    LoginLogoutPage.getBtnLogoutAndCheck().contains(logOutData.textBtnLogout).click();
+    cy
+      .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+      .its('response.statusCode')
+      .should('eq', apiData.statusCodeNumber);
+    LoginLogoutPage.getBtnLoginAndCheck().contains(logOutData.textBtnLogin);
+    cy.checkUrl(UrlData.baseUrl);
+    LoginLogoutPage.getTextTitleHomePage().contains(loginData.textTitleHomePage)
 })
 
 Cypress.Commands.add('preserveCookiesSession', () => {
@@ -41,6 +27,12 @@ Cypress.Commands.add('clearCookiesSession', () => {
 Cypress.Commands.add('navigateToPageAndCheckUrl', (url) => {
     cy
       .visit(url || '')
+      .url()
+      .should('contain', url);
+})
+
+Cypress.Commands.add('checkUrl', (url) => {
+    cy
       .url()
       .should('contain', url);
 })
