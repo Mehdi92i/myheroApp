@@ -1,20 +1,20 @@
-import * as HomePage from '/cypress/support//PageObject/HomePage.js';
-import * as SignUpPage from '/cypress/support//PageObject/SignUpPage.js';
-import * as LoginPage from '/cypress/support//PageObject/LoginPage.js';
-import * as CreateHeroPage from '/cypress/support//PageObject/CreateHeroPage.js';
-import * as DeleteHeroPage from '/cypress/support//PageObject/DeleteHeroPage.js';
-import { logOutUser } from '../support/commands';
+import * as HomePage from '/cypress/support/PageObject/HomePage.js';
+import * as SignUpPage from '/cypress/support/PageObject/SignUpPage.js';
+import * as LoginPage from '/cypress/support/PageObject/LoginPage.js';
+import * as CreateHeroPage from '/cypress/support/PageObject/CreateHeroPage.js';
+import * as DeleteHeroPage from '/cypress/support/PageObject/DeleteHeroPage.js';
+import * as UrlData from '/cypress/fixtures/urlData.json';
+import * as apiData from '/cypress/fixtures/apiData.json';
 
-describe('izicap.cy.js', () => {
+describe('Register an account - Login - Cretate Hero - Delete Hero', () => {
 
   before(() => {
-    cy.clearCookies();
-    cy.visit('https://ismaestro.github.io/angular-example-app/');
-    cy.url().should('include','https://ismaestro.github.io/angular-example-app/');
+    cy.clearCookiesSession();
+    cy.navigateToPageAndCheckUrl(UrlData.baseUrl);
   })
 
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce('accessToken','refreshToken');
+    cy.preserveCookiesSession();
   })
 
   const rdmvalue = () => Cypress._.random(0, 1e6);
@@ -26,13 +26,20 @@ describe('izicap.cy.js', () => {
   const nameHero = `NameHero${rdmValueString}`;
   const alterEgoHero = `NameHero${rdmValueString}`;
 
-  it('should visit homepage', () => {
+  it('Should visit homepage', () => {
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
     HomePage.getAndCheckTitleHomePage();
+    cy
+    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+    .its('response.statusCode')
+    .should('eq', 200);
     HomePage.getAndCheckHerosCard();
     HomePage.getBtnSignUpTopBar().click();
   })
 
-  it('register on the site', () => {
+  it('Should register an account', () => {
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
+    cy.url().should('include',UrlData.urlSignUp);
     SignUpPage.getTitlePageSignUp();
     SignUpPage.getInputFirstName().type(firstName).should('have.value', firstName);
     SignUpPage.getInputLastName().type(lastName).should('have.value', lastName);
@@ -40,31 +47,46 @@ describe('izicap.cy.js', () => {
     SignUpPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
     SignUpPage.getWordingInputPassword();
     SignUpPage.getBtnValidateSignUp().click();
-    cy.url().should('include','https://ismaestro.github.io/angular-example-app/auth/log-in');
+    cy
+    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+    .its('response.statusCode')
+    .should('eq', 200);
+    cy.url().should('include',UrlData.urlLogin);
     SignUpPage.getWordingSignUpComplete();
   })
 
-  it('Login with the created user ', () => {
+  it('Should Login with the created user ', () => {
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
     LoginPage.getAndCheckTitleLoginPage();
     LoginPage.getInputEmail().type(emailSIgnUp).should('have.value', emailSIgnUp);
     LoginPage.getInputPassword().type(passwordSignUp).should('have.value', passwordSignUp);
     LoginPage.getAndCheckWordingPassword();
     LoginPage.getBtnLogin().click();
-    cy.url().should('include', 'https://ismaestro.github.io/angular-example-app/hero/my-heroes')
+    cy
+    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+    .its('response.statusCode')
+    .should('eq', 200);
+    cy.url().should('include', UrlData.urlMyHeroes)
     LoginPage.getWordingLoginComplete();
   })
   
-  it('create a new hero', () => {
+  it('Should create a new hero', () => {
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
     CreateHeroPage.getAndCheckTitleCreateHeroPage();
     CreateHeroPage.getAndCheckTitleForm();
     CreateHeroPage.getAndCheckWodingNoheroCreated();
     CreateHeroPage.getInputNameHero().type(nameHero).should('have.value', nameHero);
     CreateHeroPage.getInputAlterEgo().type(alterEgoHero).should('have.value', alterEgoHero);
     CreateHeroPage.getBtnValidateCreatedHero().click();
+    cy
+    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+    .its('response.statusCode')
+    .should('eq', 200);
     CreateHeroPage.getWordingHeroCreated();
   })
 
-  it('delete a hero', () => {
+  it('Should delete a hero', () => {
+    cy.intercept(apiData.methodPOST, apiData.urlRequest).as(apiData.nameRequest);
     DeleteHeroPage.getAndCheckHeroList().contains(alterEgoHero);
     DeleteHeroPage.getAndCheckHeroList().contains(nameHero);
     DeleteHeroPage.getBtnTrash().click();
@@ -72,9 +94,13 @@ describe('izicap.cy.js', () => {
     DeleteHeroPage.getTitleConfirmDelete();
     DeleteHeroPage.getBtnNo();
     DeleteHeroPage.getBtnYes().click();
+    cy
+    .wait(`@${apiData.nameRequest}`, { timeout: 60000 })
+    .its('response.statusCode')
+    .should('eq', 200);
   })
 
-  it('log out user', () => {
-    cy.logout();
+  it('Should log out user', () => {
+    cy.logOut();
   })
 })

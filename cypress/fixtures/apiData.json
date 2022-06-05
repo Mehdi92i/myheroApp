@@ -1,0 +1,5 @@
+{
+    "methodPOST" : "POST",
+    "urlRequest" : "https://nestjs-example-app.herokuapp.com/graphql",
+    "nameRequest" : "graphql"
+}
