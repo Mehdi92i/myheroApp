@@ -1,4 +1,6 @@
-export const getAndCheckTitleHomePage = () => cy.get('.header__title').should('be.visible').contains('Heroes published');
+import * as HomePageData from '/cypress/fixtures/homePageData.json';
+
+export const getAndCheckTitleHomePage = () => cy.get('.header__title').should('be.visible').contains(HomePageData.textHomePageTitle);
 
 export const getAndCheckHerosCard = () => cy.get('.mat-card').should('be.visible');
 

@@ -1,0 +1,5 @@
+{
+    "baseUrl" : "https://ismaestro.github.io/angular-example-app/",
+    "urlLogin" : "https://ismaestro.github.io/angular-example-app/auth/log-in",
+    "urlMyHeroes" : "https://ismaestro.github.io/angular-example-app/hero/my-heroes"
+}
